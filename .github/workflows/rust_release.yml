@@ -40,8 +40,6 @@ jobs:
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          # REPLACE 'my-binary-name' with the actual name from your Cargo.toml
-          files: target/release/my-binary-name
+          files: target/release/file-watcher
 
-          # Optional: Generate release notes automatically from PRs/commits
           generate_release_notes: true
