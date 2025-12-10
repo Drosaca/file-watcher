@@ -7,21 +7,21 @@ It is built in pure Rust and uses platform-native file notification backends for
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔍 Monitor any number of files or directories
-- 📡 Detect changes instantly
-- 📝 Reports these events:
+-  Monitor any number of files or directories
+-  Detect changes instantly
+-  Reports these events:
     - **CREATE**
     - **REMOVE**
     - **MODIFY**
-- 🛠 Reports internal states:
+-  Reports internal states:
     - **WATCHING** – when a path begins being watched
     - **ERROR** – when something goes wrong
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ```sh
 Monitors given entries events
