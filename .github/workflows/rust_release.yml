@@ -8,39 +8,40 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: write # REQUIRED: Allow the workflow to create releases
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest # Builds a Linux binary
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build release binary
-        run: cargo build --release
+      # Installs the latest stable Rust toolchain
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Get binary name
-        id: get_bin
-        run: |
-          BIN_NAME=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].targets[] | select(.kind[] == "bin") | .name')
-          echo "bin_name=$BIN_NAME" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Caching dependencies speeds up future builds (Optional but recommended)
+      - name: Cache Cargo registry and build
+        uses: actions/cache@v3
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Upload binary to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Release Binary
+        run: cargo build --release --verbose
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/release/${{ steps.get_bin.outputs.bin_name }}
-          asset_name: ${{ steps.get_bin.outputs.bin_name }}
-          asset_content_type: application/octet-stream
+          # REPLACE 'my-binary-name' with the actual name from your Cargo.toml
+          files: target/release/my-binary-name
+
+          # Optional: Generate release notes automatically from PRs/commits
+          generate_release_notes: true
